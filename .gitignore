@@ -1,0 +1,25 @@
+# --- Secrets / local config (never commit) ---
+.env
+*.env
+!.env.example
+app/config.php
+
+# --- Runtime data ---
+logs/
+*.log
+backups/
+*.sql.gz
+*.tar.gz
+/deploy/
+/releases/
+
+# --- Assignment brief PDFs (company documents, not part of the solution) ---
+/*.pdf
+
+# --- Editor / OS noise ---
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db
