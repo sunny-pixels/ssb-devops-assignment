@@ -15,6 +15,8 @@
 sudo apt update && sudo apt -y upgrade
 sudo apt -y install git rsync curl wget net-tools tree unzip cron open-vm-tools
 sudo timedatectl set-timezone Asia/Kolkata
+# Ubuntu's LVM default uses only ~half the disk – grow root to the full disk
+sudo lvextend -l +100%FREE -r /dev/ubuntu-vg/ubuntu-lv
 ip -4 addr show | grep inet        # note the VM IP, e.g. 192.168.x.x
 ```
 
