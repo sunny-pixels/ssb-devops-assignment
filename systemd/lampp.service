@@ -1,0 +1,22 @@
+# Manage XAMPP/LAMPP with systemd so the stack starts on boot and is
+# controlled with standard tooling:  systemctl start|stop|status lampp
+#
+# Install:  sudo cp systemd/lampp.service /etc/systemd/system/
+#           sudo systemctl daemon-reload && sudo systemctl enable --now lampp
+[Unit]
+Description=XAMPP LAMPP stack (Apache, MariaDB)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+# lampp daemonises Apache/MySQL itself, so treat start as a one-shot action
+Type=oneshot
+# Start only Apache + MySQL (FTP is not needed – smaller attack surface)
+ExecStart=/bin/sh -c '/opt/lampp/lampp startapache && /opt/lampp/lampp startmysql'
+ExecStop=/opt/lampp/lampp stop
+ExecReload=/opt/lampp/lampp reloadapache
+RemainAfterExit=yes
+TimeoutSec=120
+
+[Install]
+WantedBy=multi-user.target

@@ -22,12 +22,13 @@ apache/       virtual host config
 cron/         scheduled backup example
 docs/         setup guides, permissions, incident note
 screenshots/  evidence
+systemd/      lampp.service (start stack on boot)
 .github/      CI workflow (PHP lint, ShellCheck, secret scan)
 ```
 
 ## Contents
 0. [VM preparation](docs/00-vm-setup.md)
-1. LAMPP setup & checks — _todo_
+1. [LAMPP setup & checks](docs/01-lampp-setup.md)
 2. MySQL + phpMyAdmin — _todo_
 3. Core PHP application — _todo_
 4. Rsync deployment & release flow — _todo_
