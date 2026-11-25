@@ -105,6 +105,8 @@ step 4/6 "Preview (rsync --dry-run)"
 DEPLOY_OWNER="$(id -un)"
 RSYNC_OPTS=(
     --archive --delete --itemize-changes
+    --omit-dir-times                     # folder mtimes change whenever a file inside is
+                                         # added/removed (e.g. REVISION) – not a real change
     --chown="$DEPLOY_OWNER:$WEB_GROUP"   # owner can update, Apache group can only read
     --chmod=D750,F640                    # nothing world-readable or writable
 )

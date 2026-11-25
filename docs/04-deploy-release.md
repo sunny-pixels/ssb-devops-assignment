@@ -23,6 +23,7 @@
 | `--archive` | recurse, keep timestamps/links → unchanged files are skipped (size + mtime) |
 | `--delete` | remove files from the target that were deleted in Git |
 | `--itemize-changes` | one line per changed file → readable preview and audit |
+| `--omit-dir-times` | ignore folder timestamps – see the note below |
 | `--chown=ssbadmin:daemon --chmod=D750,F640` | deploy user owns the code, Apache can only **read** it, others nothing |
 | `--exclude` | `.git/ .gitignore .gitattributes .env *.env logs/ *.log backups/ *.sql *.sql.gz *.tar.gz *.bak *.orig *.swp *~ .vscode/ .idea/ REVISION` |
 
@@ -56,6 +57,11 @@ sudo ls -la /opt/lampp/htdocs/ssb-app /opt/lampp/htdocs/ssb-app/inc
 cat logs/deploy.log
 ```
 Ends with *"Deployed … – health check HTTP 200."*; files are `-rw-r----- ssbadmin daemon`.
+
+> **Found while testing:** the first no-change dry run still reported `.d..t...... ./`
+> (`screenshots/04-dir-mtime-noise.png`). Writing `REVISION` into the target after rsync
+> bumped the folder's mtime – and any file added/removed under `app/` does the same – so the
+> preview showed a "change" with no content difference. Fixed by adding `--omit-dir-times`.
 
 ## 4.4 Nothing changed → nothing transferred
 ```bash
@@ -103,6 +109,7 @@ git checkout v1.0.0 && ./scripts/deploy.sh && git checkout main
 | `screenshots/04-dry-run.png` | 4.2 – itemized preview, nothing changed |
 | `screenshots/04-deploy.png` | 4.3 – confirm, stats, REVISION, health 200 |
 | `screenshots/04-deployed-files.png` | 4.3 – target listing (`ssbadmin daemon`, `640`/`750`) |
+| `screenshots/04-dir-mtime-noise.png` | finding – folder-mtime false positive before `--omit-dir-times` |
 | `screenshots/04-no-changes.png` | 4.4 – "Nothing to deploy" |
 | `screenshots/04-excludes.png` | 4.5 – junk/secret files not picked up |
 | `screenshots/04-changed-file-only.png` | 4.6 – one file in preview, 1 file transferred |
