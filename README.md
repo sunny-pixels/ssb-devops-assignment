@@ -29,7 +29,7 @@ systemd/      lampp.service (start stack on boot)
 ## Contents
 0. [VM preparation](docs/00-vm-setup.md)
 1. [LAMPP setup & checks](docs/01-lampp-setup.md)
-2. MySQL + phpMyAdmin — _todo_
+2. [MySQL + phpMyAdmin](docs/02-mysql-phpmyadmin.md)
 3. Core PHP application — _todo_
 4. Rsync deployment & release flow — _todo_
 5. Backup & restore — _todo_
