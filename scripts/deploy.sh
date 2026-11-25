@@ -120,8 +120,8 @@ if [[ -z "$changes" ]]; then
 else
     echo "$changes" | sed 's/^/  /'
     count="$(grep -c . <<< "$changes")"
-    echo "  -- $count change(s).  >f+++++++ new file · >f.st..... content changed ·"
-    echo "     .f...pog permissions/owner only · *deleting removed from target"
+    echo "  -- $count change(s).  >f+++++++ new file · >f.st.... content changed ·"
+    echo "     .f...p.g.. only permissions (p) / owner (o) / group (g) · *deleting removed from target"
 fi
 
 if [[ "$MODE" == dry-run ]]; then

@@ -42,8 +42,12 @@ sudo ./scripts/deploy.sh --dry-run                         # → ERROR: run as y
 ./scripts/deploy.sh --dry-run
 ```
 First run after the manual copy of Phase 3: `health.php` shows as **content changed**
-(`>f.st......`) and the other files as **permissions/owner only** (`.f...pog`) – they move
-from `ssbadmin:ssbadmin 644` to `ssbadmin:daemon 640`. Ends with *"Dry run only – nothing was changed."*
+(`>f.stp.g...`) and the other 12 entries as **permissions + group only** (`.f...p.g...`) – they
+move from `ssbadmin:ssbadmin 644` to `ssbadmin:daemon 640` (owner stays `ssbadmin`, so no `o`).
+Ends with *"Dry run only – nothing was changed."*
+
+How to read an itemize line: `>` = file will be sent, `.` = not sent (attributes only),
+`c` = created; then `s` size, `t` time, `p` permissions, `o` owner, `g` group differ.
 
 ## 4.3 Deploy
 ```bash
