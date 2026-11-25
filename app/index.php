@@ -67,6 +67,10 @@ $items     = all_items();
 $flashMsg  = take_flash();
 $isEditing = $editId !== null;
 $lowStock  = 5;
+
+// REVISION is written by scripts/deploy.sh; shown in the footer so the live release is visible
+$revisionFile = __DIR__ . '/REVISION';
+$release      = is_readable($revisionFile) ? trim((string) file_get_contents($revisionFile)) : 'dev';
 ?>
 <!doctype html>
 <html lang="en">
@@ -153,7 +157,8 @@ $lowStock  = 5;
     </section>
 
     <footer class="muted small">
-        <a href="health.php">health.php</a> · host <?= e(gethostname() ?: '') ?>
+        <a href="health.php">health.php</a> · release <code><?= e($release) ?></code>
+        · host <?= e(gethostname() ?: '') ?>
     </footer>
 </main>
 </body>
