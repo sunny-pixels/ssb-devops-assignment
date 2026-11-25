@@ -22,6 +22,7 @@ done
 section "Host"
 echo "Date     : $(date '+%F %T %Z')"
 echo "Hostname : $(hostname)"
+# shellcheck source=/dev/null
 echo "OS       : $(. /etc/os-release && echo "$PRETTY_NAME")"
 
 section "LAMPP service status"
@@ -43,7 +44,7 @@ echo "Apache runs as: $(grep -E '^(User|Group) ' "$LAMPP_HOME/etc/httpd.conf" | 
 
 section "Log locations"
 php_err=$(grep -E '^\s*error_log\s*=' "$LAMPP_HOME/etc/php.ini" | tail -1 | cut -d= -f2- | xargs || true)
-mysql_err=$(ls "$LAMPP_HOME"/var/mysql/*.err 2>/dev/null | head -1 || true)
+mysql_err=$(find "$LAMPP_HOME/var/mysql" -maxdepth 1 -name '*.err' 2>/dev/null | head -1 || true)
 echo "Apache access : $LAMPP_HOME/logs/access_log"
 echo "Apache error  : $LAMPP_HOME/logs/error_log"
 echo "PHP errors    : ${php_err:-Apache error_log (php.ini error_log not set)}"
@@ -61,4 +62,9 @@ echo "HTTP $code"
 cat /tmp/health.json 2>/dev/null || true
 rm -f /tmp/health.json
 
-[[ "$code" == "200" ]] && echo -e "\nRESULT: PASS" || { echo -e "\nRESULT: FAIL"; exit 1; }
+if [[ "$code" == "200" ]]; then
+    echo -e "\nRESULT: PASS"
+else
+    echo -e "\nRESULT: FAIL"
+    exit 1
+fi

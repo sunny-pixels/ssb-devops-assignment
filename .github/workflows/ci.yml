@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  php-lint:
+    name: PHP syntax (php -l, PHP 8.2 like XAMPP)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          coverage: none
+      - name: php -l on every PHP file
+        run: |
+          set -o pipefail
+          find app -name '*.php' -print0 | xargs -0 -n1 php -l | tee lint.txt
+          ! grep -v '^No syntax errors detected' lint.txt
+
+  shellcheck:
+    name: ShellCheck (scripts/*.sh)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: shellcheck
+        run: |
+          shellcheck --version
+          shellcheck scripts/*.sh
+
+  secret-scan:
+    name: No secrets committed
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # scan the whole history, not just the last commit
+      - name: .env never tracked
+        run: |
+          if git log --all --format=%h -- .env | grep -q .; then
+            echo "::error::.env appears in Git history"; exit 1
+          fi
+      - name: no real DB passwords in any commit
+        run: |
+          if git rev-list --all | xargs git grep -nE '^(BACKUP_)?DB_PASS=[A-Za-z0-9._-]{12,}'; then
+            echo "::error::a real-looking DB password is committed"; exit 1
+          fi
+          echo "clean"

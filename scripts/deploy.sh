@@ -121,7 +121,7 @@ RSYNC_OPTS=(
     --omit-dir-times                     # folder mtimes change whenever a file inside is
                                          # added/removed (e.g. REVISION) – not a real change
     --chown="$DEPLOY_OWNER:$WEB_GROUP"   # owner can update, Apache group can only read
-    --chmod=D750,F640                    # nothing world-readable or writable
+    "--chmod=D750,F640"                  # nothing world-readable or writable
 )
 for pattern in "${EXCLUDES[@]}"; do
     RSYNC_OPTS+=(--exclude="$pattern")
@@ -133,7 +133,7 @@ if [[ -z "$changes" ]]; then
     echo "  Nothing to deploy – $DEPLOY_DIR already matches $SOURCE_DIR."
     count=0
 else
-    echo "$changes" | sed 's/^/  /'
+    printf '  %s\n' "${changes//$'\n'/$'\n'  }"     # indent every line
     count="$(grep -c . <<< "$changes")"
     echo "  -- $count change(s).  >f+++++++ new file · >f.st.... content changed ·"
     echo "     .f...p.g.. only permissions (p) / owner (o) / group (g) · *deleting removed from target"

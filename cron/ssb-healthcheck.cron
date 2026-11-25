@@ -1,0 +1,14 @@
+# Health check every 5 minutes, for user ssbadmin.
+# Quiet (-q): writes to logs/health.log ONLY when something fails, and also sends
+# a line to syslog (journalctl -t ssb-healthcheck) so failures are easy to find.
+#
+# Install both cron files together (crontab replaces the whole table):
+#   cat cron/ssb-backup.cron cron/ssb-healthcheck.cron | crontab -
+#   crontab -l
+
+SHELL=/bin/bash
+PATH=/usr/local/bin:/usr/bin:/bin
+MAILTO=""
+
+# m    h  dom mon dow   command
+*/5    *  *   *   *     /home/ssbadmin/ssb-devops-assignment/scripts/healthcheck.sh -q >> /home/ssbadmin/ssb-devops-assignment/logs/health.log 2>&1 || logger -t ssb-healthcheck "UNHEALTHY - see logs/health.log"
