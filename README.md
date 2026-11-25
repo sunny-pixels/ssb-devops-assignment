@@ -33,6 +33,6 @@ systemd/      lampp.service (start stack on boot)
 3. [Core PHP application](docs/03-php-app.md)
 4. [Rsync deployment & release flow](docs/04-deploy-release.md)
 5. [Backup & restore](docs/05-backup-restore.md)
-6. Security & permissions — _todo_
+6. [Security & permissions](docs/06-security-permissions.md)
 7. Troubleshooting / incident note — _todo_
 8. Bonus: CI, vhost, cron, health check — _todo_
