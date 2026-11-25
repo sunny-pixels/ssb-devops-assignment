@@ -60,6 +60,9 @@ mkdir -p /tmp/restore-files && tar -xzf "$F" -C /tmp/restore-files
 diff -r /tmp/restore-files/ssb-app /opt/lampp/htdocs/ssb-app && echo "files backup identical to live"
 rm -rf /tmp/restore-files
 ```
+`diff -r` compares content only. Extracted as `ssbadmin`, the files get group `ssbadmin`;
+a real restore with `sudo tar -xzf … -C /opt/lampp/htdocs` runs as root and keeps the
+archived owner/group (`ssbadmin:daemon`) and modes (`640`/`750`).
 
 ## 5.6 Retention
 Fake two 10-day-old backups, run a backup, watch them get deleted:
