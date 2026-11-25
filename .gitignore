@@ -2,7 +2,6 @@
 .env
 *.env
 !.env.example
-app/config.php
 
 # --- Runtime data ---
 logs/

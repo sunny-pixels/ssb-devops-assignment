@@ -1,0 +1,7 @@
+# XAMPP's htdocs has "Options Indexes": without this, /ssb-app/assets/ would list its files.
+Options -Indexes
+
+# Never serve env/backup/editor files even if one is accidentally deployed.
+<FilesMatch "(^\.env|\.(env|sql|gz|bak|orig|swp|log)$|~$)">
+    Require all denied
+</FilesMatch>
