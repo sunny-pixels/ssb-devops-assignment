@@ -64,6 +64,10 @@ ls -la /opt/lampp/htdocs/ssb-app /opt/lampp/htdocs/ssb-app/inc
 3. **Edit** – click *Edit* on that row → change quantity to `9` → *Save changes* → "Item LAP-003 updated."
 4. **Validation** – try adding SKU `LAP-001` again → "SKU LAP-001 already exists".
 
+> The new item got **id 12, not 11**. id 11 was used by `DEMO-001` in Phase 2 and then
+> deleted – InnoDB never reuses AUTO_INCREMENT values. The rejected duplicate insert also
+> consumes one, so the next item will be id 14. Gaps in ids are normal and harmless.
+
 ## 3.5 Verify from the database side
 ```bash
 M=/opt/lampp/bin/mysql
@@ -98,9 +102,8 @@ done
 | `screenshots/03-php-lint.png` | 3.1 – `php -l` on every file |
 | `screenshots/03-config-perms.png` | 3.2 – `/etc/ssb-app` perms, daemon can read, ssbadmin denied |
 | `screenshots/03-app-list.png` | 3.4 – item list in the browser |
-| `screenshots/03-app-add.png` | 3.4 – "Item … added" |
-| `screenshots/03-app-edit.png` | 3.4 – edit form / "Item … updated" |
+| `screenshots/03-app-add-1.png`, `-2.png` | 3.4 – "Item LAP-003 added", new row (qty 4, red) |
+| `screenshots/03-app-edit-1.png`, `-2.png` | 3.4 – "Item LAP-003 updated", qty 9, newer timestamp |
 | `screenshots/03-app-validation.png` | 3.4 – duplicate SKU message |
 | `screenshots/03-db-verify.png` | 3.5 – the new row seen from MySQL |
-| `screenshots/03-health-db.png` | 3.6 – health JSON with database ok |
-| `screenshots/03-hardening.png` | 3.7 – 403 responses |
+| `screenshots/03-health-hardening.png` | 3.6 – health JSON (config + database ok, 11 items, HTTP 200) · 3.7 – all five paths 403 |
