@@ -71,6 +71,14 @@ Browser on Windows → **http://192.168.198.133/phpmyadmin** → log in as `root
 - **Not** the database user or its grants – those live in the `mysql` system database.
   After restoring onto a new server, `create-db-user.sh` must be run again.
 - **Not** `CREATE DATABASE` (Quick export of one DB) – the target DB is chosen at import time.
+- Indexes and AUTO_INCREMENT are added **after** the data (`ALTER TABLE … ADD PRIMARY KEY …`,
+  `AUTO_INCREMENT=11`) – faster bulk load, and new rows continue from id 11.
+- Plain `CREATE TABLE` (no `IF NOT EXISTS`, no `DROP TABLE`) – importing into a database that
+  already has `items` fails. Restore into an **empty/new** database (Phase 5 does exactly that).
+- Wrapped in `START TRANSACTION … COMMIT` – a failed import does not leave half the rows.
+- **Timestamps appear 5:30 h earlier** (`06:33:50` vs `12:03:50` in the browse view): the dump
+  runs `SET time_zone = "+00:00"`, so `TIMESTAMP` values are written in UTC. On import the same
+  setting is applied, so they are restored to the identical instant – nothing is lost.
 
 ## 2.6 CRUD queries as the app user
 ```bash
@@ -86,6 +94,8 @@ $M -h 127.0.0.1 -u ssb_app -p ssb_inventory --table --verbose < database/queries
 | 5 | `DELETE FROM items WHERE sku='DEMO-001'` | removes that one row; same WHERE warning |
 
 Ends with `demo_rows_left = 0` and `total_items = 10` – seed data untouched.
+New row got `id = 11`, continuing from the `AUTO_INCREMENT=11` seen in the export.
+(`updated_at` equals `created_at` here only because the UPDATE ran in the same second.)
 
 ## 2.7 Prove the app user is restricted
 ```bash
@@ -94,6 +104,36 @@ $M -h 127.0.0.1 -u ssb_app -p -e "SHOW DATABASES;"
 ```
 Expected: `ERROR 1142 (42000): DROP command denied to user 'ssb_app'@…` for table `items`,
 and `SHOW DATABASES` lists only `information_schema` and `ssb_inventory`.
+
+Note: the error names `'ssb_app'@'localhost'` although we connected over TCP to
+`127.0.0.1` – MariaDB reverse-resolves the loopback address to `localhost` and matches that
+account. Creating both host entries (2.3) makes the app work either way.
+
+## 2.8 Finding: every user can see the `test` database → removed
+`SHOW DATABASES` as `ssb_app` also listed **`test`**, which was never granted.
+**Cause:** legacy MySQL default kept by XAMPP – a wildcard row in `mysql.db` gives *all*
+users (even anonymous) full rights on `test` and `test_*`. `lampp security` does not remove
+it (on a normal install `mysql_secure_installation` does).
+
+**Inspect (root):**
+```bash
+$M -u root -p --table -e "
+  SELECT Host, Db, User FROM mysql.db WHERE Db LIKE 'test%';
+  SELECT User, Host FROM mysql.user WHERE User = '';"
+```
+**Fix (root):**
+```bash
+$M -u root -p -e "
+  DROP DATABASE IF EXISTS test;
+  DELETE FROM mysql.db WHERE Db IN ('test', 'test\\_%');
+  DROP USER IF EXISTS ''@'localhost', ''@'ssb-lamp', ''@'%';
+  FLUSH PRIVILEGES;"
+```
+**Found:** `%` / `test` and `%` / `test\_%` with an empty `User` (= any user from any host),
+plus an **anonymous account `''@'localhost'`** – anyone on the VM could log in without a
+username and write to `test`.
+
+**Verify (app user):** `SHOW DATABASES` now lists only `information_schema` and `ssb_inventory`.
 
 ---
 
@@ -107,5 +147,9 @@ and `SHOW DATABASES` lists only `information_schema` and `ssb_inventory`.
 | `screenshots/02-phpmyadmin-table.png` | 2.4 – `items` table browse view (10 rows) |
 | `screenshots/02-phpmyadmin-export.png` | 2.5 – Export page (Quick / SQL) |
 | `screenshots/02-phpmyadmin-export.sql` | 2.5 – the exported backup file |
-| `screenshots/02-queries.png` | 2.6 – CRUD output as `ssb_app` |
-| `screenshots/02-privilege-denied.png` | 2.7 – DROP denied + limited SHOW DATABASES |
+| `screenshots/02-queries-1.png` … `-3.png` | 2.6 – CRUD output as `ssb_app` (SELECT → INSERT → UPDATE → DELETE → counts) |
+| `screenshots/02-privilege-denied.png` | 2.7 – `DROP TABLE` denied for `ssb_app` |
+| `screenshots/02-privilege-mysql-user.png` | 2.7 – reading `mysql.user` denied |
+| `screenshots/02-show-databases-before.png` | 2.8 – finding: `test` DB visible to the app user |
+| `screenshots/02-test-db-inspect.png` | 2.8 – wildcard `mysql.db` grant / anonymous users |
+| `screenshots/02-show-databases-after.png` | 2.8 – after fix: only `ssb_inventory` visible |
