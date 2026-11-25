@@ -1,0 +1,67 @@
+
+==================== Host ====================
+Date     : 2026-11-25 11:53:12 IST
+Hostname : ssb-lamp
+OS       : Ubuntu 24.04.5 LTS
+
+==================== LAMPP service status ====================
+Version: XAMPP for Linux 8.2.12-0
+Apache is running.
+MySQL is running.
+ProFTPD is not running.
+
+==================== Component versions ====================
+Server version: Apache/2.4.58 (Unix)
+PHP 8.2.12 (cli) (built: Nov 25 2023 08:09:53) (NTS)
+/opt/lampp/bin/mysql  Ver 15.1 Distrib 10.4.32-MariaDB, for Linux (x86_64) using readline 5.1
+
+==================== Listening ports (80 http, 443 https, 3306 mysql, 21 ftp) ====================
+State  Recv-Q Send-Q Local Address:Port Peer Address:PortProcess                                                                                                                                                                                                             
+LISTEN 0      80         127.0.0.1:3306      0.0.0.0:*    users:(("mysqld",pid=4010,fd=18))                                                                                                                                                                                  
+LISTEN 0      511                *:443             *:*    users:(("/opt/lampp/bin/",pid=3758,fd=6),("/opt/lampp/bin/",pid=3757,fd=6),("/opt/lampp/bin/",pid=3756,fd=6),("/opt/lampp/bin/",pid=3755,fd=6),("/opt/lampp/bin/",pid=3754,fd=6),("/opt/lampp/bin/",pid=3745,fd=6))
+LISTEN 0      511                *:80              *:*    users:(("/opt/lampp/bin/",pid=3758,fd=4),("/opt/lampp/bin/",pid=3757,fd=4),("/opt/lampp/bin/",pid=3756,fd=4),("/opt/lampp/bin/",pid=3755,fd=4),("/opt/lampp/bin/",pid=3754,fd=4),("/opt/lampp/bin/",pid=3745,fd=4))
+
+==================== Key config files ====================
+etc/httpd.conf                   present
+etc/extra/httpd-xampp.conf       present
+etc/php.ini                      present
+etc/my.cnf                       present
+Apache runs as: User daemon Group daemon 
+
+==================== Log locations ====================
+Apache access : /opt/lampp/logs/access_log
+Apache error  : /opt/lampp/logs/error_log
+PHP errors    : /opt/lampp/logs/php_error_log
+MySQL error   : /opt/lampp/var/mysql/ssb-lamp.err
+
+--- last 5 lines: /opt/lampp/logs/error_log
+[Wed Nov 25 11:46:39.376116 2026] [ssl:warn] [pid 3745] AH01906: www.example.com:443:0 server certificate is a CA certificate (BasicConstraints: CA == TRUE !?)
+[Wed Nov 25 11:46:39.376174 2026] [ssl:warn] [pid 3745] AH01909: www.example.com:443:0 server certificate does NOT include an ID which matches the server name
+[Wed Nov 25 11:46:39.376466 2026] [lbmethod_heartbeat:notice] [pid 3745] AH02282: No slotmem from mod_heartmonitor
+[Wed Nov 25 11:46:39.430871 2026] [mpm_prefork:notice] [pid 3745] AH00163: Apache/2.4.58 (Unix) OpenSSL/1.1.1w PHP/8.2.12 mod_perl/2.0.12 Perl/v5.34.1 configured -- resuming normal operations
+[Wed Nov 25 11:46:39.430965 2026] [core:notice] [pid 3745] AH00094: Command line: '/opt/lampp/bin/httpd -E /opt/lampp/logs/error_log -D SSL -D PHP'
+
+--- last 5 lines: /opt/lampp/var/mysql/ssb-lamp.err
+2026-11-25 11:46:40 0 [Note] Added new Master_info '' to hash table
+2026-11-25 11:46:40 0 [Note] /opt/lampp/sbin/mysqld: ready for connections.
+Version: '10.4.32-MariaDB'  socket: '/opt/lampp/var/mysql/mysql.sock'  port: 3306  Source distribution
+2026-11-25 11:46:40 0 [Note] InnoDB: Buffer pool(s) load completed at 261125 11:46:40
+2026-11-25 11:46:40 8 [Warning] Access denied for user 'root'@'localhost' (using password: NO)
+
+==================== HTTP health check: http://localhost/ssb-app/health.php ====================
+HTTP 200
+{
+    "status": "ok",
+    "php_version": "8.2.12",
+    "server": "Apache/2.4.58 (Unix) OpenSSL/1.1.1w PHP/8.2.12 mod_perl/2.0.12 Perl/v5.34.1",
+    "hostname": "ssb-lamp",
+    "checks": {
+        "ext_pdo_mysql": "ok",
+        "ext_mysqli": "ok",
+        "ext_mbstring": "ok",
+        "ext_json": "ok"
+    },
+    "time": "2026-11-25T11:53:13+05:30"
+}
+
+RESULT: PASS

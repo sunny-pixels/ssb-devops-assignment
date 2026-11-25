@@ -80,6 +80,52 @@ grep -n -A1 "Require local" "$F"
 sudo /opt/lampp/lampp reloadapache   # or: sudo systemctl reload lampp
 ```
 
+### MySQL: loopback-only TCP instead of `skip-networking`
+`lampp security` "secures" MySQL by appending `skip-networking` to `my.cnf`, which
+turns TCP off entirely (`ss` shows no 3306; error log shows `port: 0`). The app and
+scripts connect via `DB_HOST=127.0.0.1`, so they would get *Connection refused*.
+Keep TCP, but bind it to loopback only – unreachable from the network, usable locally:
+```bash
+F=/opt/lampp/etc/my.cnf
+sudo cp "$F" "$F.orig"
+sudo sed -i 's/^skip-networking$/#skip-networking\nbind-address=127.0.0.1/' "$F"
+grep -nE 'skip-networking|bind-address' "$F"
+sudo systemctl restart lampp
+sudo ss -tlnp | grep 3306                     # → 127.0.0.1:3306 (not *:3306)
+/opt/lampp/bin/mysql -h 127.0.0.1 -P 3306 -u root -p -e "SELECT 'tcp ok' AS result;"
+```
+| State | `ss` shows | Verdict |
+|---|---|---|
+| XAMPP default | `*:3306` | reachable from the whole network ✗ |
+| after `lampp security` | nothing (`port: 0`) | safe, but app TCP connections fail ✗ |
+| `bind-address=127.0.0.1` | `127.0.0.1:3306` | local-only and usable ✓ |
+
+### MariaDB system-table mismatch (`mysql_upgrade`)
+**Symptom** (`/opt/lampp/var/mysql/ssb-lamp.err`, on every phpMyAdmin page load):
+```
+[ERROR] Incorrect definition of table mysql.column_stats: expected column 'max_value'
+        at position 4 to have type varbinary(255), found type varchar(255).
+```
+**Cause:** the XAMPP bundle ships `mysql.*` system tables from an older MariaDB than
+its 10.4.32 server binary. **Fix** (one-off):
+```bash
+sudo /opt/lampp/bin/mysql_upgrade -u root -p     # all 7 phases → OK
+sudo systemctl restart lampp
+sudo tail -n 5 /opt/lampp/var/mysql/ssb-lamp.err # column_stats errors gone
+```
+> The remaining `Access denied for user 'root'@'localhost' (using password: NO)` warning
+> at startup is the `lampp` script's own password-less ping – harmless.
+
+### PHP timezone
+XAMPP ships `date.timezone=Europe/Berlin`, so PHP timestamps were 4.5 h off the
+VM clock (IST). Align it with the OS:
+```bash
+sudo sed -i 's|^date.timezone=.*|date.timezone=Asia/Kolkata|' /opt/lampp/etc/php.ini
+grep -n '^date.timezone' /opt/lampp/etc/php.ini
+sudo systemctl reload lampp
+```
+Verified: `health.php` `"time"` changed from `…+01:00` to `…+05:30`.
+
 ## 1.6 PHP verification
 **phpinfo (temporary – exposes config, delete after the screenshot):**
 ```bash
@@ -108,7 +154,14 @@ sudo ./scripts/lampp-check.sh | tee ~/01-lampp-check.txt
 |---|---|
 | `screenshots/01-lampp-status.png` | `lampp status` / `systemctl status lampp` |
 | `screenshots/01-ports.png` | `ss -tlnp` with 80/443/3306 |
-| `screenshots/01-phpinfo.png` | phpinfo page in browser |
+| `screenshots/01-phpinfo.png` | phpinfo page in browser (`01-phpinfo-cmd.png`: how it was created) |
 | `screenshots/01-health.png` | `/ssb-app/health.php` JSON in browser |
+| `screenshots/01-health-curl.png` | `curl -i` → `HTTP/1.1 200 OK`, all extension checks `ok`, IST time |
 | `screenshots/01-phpmyadmin-login.png` | phpMyAdmin from Windows host |
+| `screenshots/01-security-check.png` | `lampp security` quick check (root password set) |
+| `screenshots/01-mysql-skip-networking.png` | diagnosis: no 3306 listener, `skip-networking` in `my.cnf` |
+| `screenshots/01-mysql-bind-localhost.png` | fix: `127.0.0.1:3306` + `tcp ok` |
+| `screenshots/01-mysql-upgrade-1.png`, `-2.png` | `mysql_upgrade` run, clean error log |
+| `screenshots/01-lampp-check-1.png`, `-2.png` | first `lampp-check.sh` run (before the MySQL fixes) |
+| `screenshots/01-lampp-check-final-1.png`, `-2.png` | final run: `127.0.0.1:3306`, clean MySQL log, `port: 3306`, PASS |
 | `screenshots/01-lampp-check.txt` | full output of `lampp-check.sh` |
