@@ -31,7 +31,7 @@ systemd/      lampp.service (start stack on boot)
 1. [LAMPP setup & checks](docs/01-lampp-setup.md)
 2. [MySQL + phpMyAdmin](docs/02-mysql-phpmyadmin.md)
 3. [Core PHP application](docs/03-php-app.md)
-4. Rsync deployment & release flow — _todo_
+4. [Rsync deployment & release flow](docs/04-deploy-release.md)
 5. Backup & restore — _todo_
 6. Security & permissions — _todo_
 7. Troubleshooting / incident note — _todo_

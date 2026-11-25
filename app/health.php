@@ -47,10 +47,15 @@ if ($checks['config'] === 'ok') {
 
 $healthy = !array_filter($checks, static fn (string $v): bool => $v !== 'ok');
 
+// Written by scripts/deploy.sh – shows which Git release is live
+$revisionFile = __DIR__ . '/REVISION';
+$revision     = is_readable($revisionFile) ? trim((string) file_get_contents($revisionFile)) : null;
+
 http_response_code($healthy ? 200 : 503);
 
 echo json_encode([
     'status'      => $healthy ? 'ok' : 'fail',
+    'revision'    => $revision,
     'php_version' => PHP_VERSION,
     'server'      => $_SERVER['SERVER_SOFTWARE'] ?? 'cli',
     'hostname'    => gethostname(),
