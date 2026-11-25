@@ -95,8 +95,13 @@ echo "  ok  $(find "$SOURCE_DIR" -name '*.php' | wc -l) PHP files"
 # -----------------------------------------------------------------------------
 step 3/6 "Release"
 REVISION="$(git -C "$REPO_ROOT" describe --tags --always --dirty)"
-if [[ -n "$(git -C "$REPO_ROOT" status --porcelain -- "$SOURCE_DIR")" ]]; then
-    warn "uncommitted changes in $SOURCE_DIR – they will be deployed (revision marked -dirty)"
+modified="$(git -C "$REPO_ROOT" status --porcelain --untracked-files=no -- "$SOURCE_DIR")"
+untracked="$(git -C "$REPO_ROOT" ls-files --others --exclude-standard -- "$SOURCE_DIR")"
+if [[ -n "$modified" ]]; then
+    warn "uncommitted edits to tracked files in app/ will be deployed (revision ends in -dirty)"
+fi
+if [[ -n "$untracked" ]]; then
+    warn "untracked files in app/ (deployed unless they match an exclude): $(echo "$untracked" | xargs -n1 basename | paste -sd' ')"
 fi
 echo "  revision  $REVISION"
 

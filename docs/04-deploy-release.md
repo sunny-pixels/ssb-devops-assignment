@@ -78,6 +78,12 @@ mkdir -p app/backups && touch app/backups/old.sql.gz
 rm -rf app/debug.log app/notes.bak app/.env app/backups
 ```
 
+Only `notes.bak` is visible to Git (`.env`, `*.log`, `backups/` are git-ignored too). The first
+version of the script warned *"uncommitted changes … will be deployed (revision marked -dirty)"*
+here – wrong on both counts, since the file is excluded and untracked files don't make a revision
+dirty. The warning now distinguishes **edited tracked files** (→ `-dirty`) from **untracked
+files** (named, "deployed unless they match an exclude").
+
 ## 4.6 Update: only the changed file is transferred
 A one-file change is committed (`app/index.php`), then on the VM:
 ```bash
