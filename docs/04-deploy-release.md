@@ -118,5 +118,7 @@ git checkout v1.0.0 && ./scripts/deploy.sh && git checkout main
 | `screenshots/04-dir-mtime-noise.png` | finding – folder-mtime false positive before `--omit-dir-times` |
 | `screenshots/04-no-changes.png` | 4.4 – "Nothing to deploy" |
 | `screenshots/04-excludes.png` | 4.5 – junk/secret files not picked up |
+| `screenshots/04-excludes-warning-fixed.png` | 4.5 – corrected warning names the untracked file, revision not `-dirty` |
+| `screenshots/04-release-footer.png` | 4.6 – live page footer shows the deployed release |
 | `screenshots/04-changed-file-only.png` | 4.6 – one file in preview, 1 file transferred |
 | `screenshots/04-tag-release.png` | 4.7 – tag pushed, health shows `v1.0.0` |
