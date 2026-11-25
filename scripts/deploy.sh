@@ -76,9 +76,17 @@ sudo test -f "$APP_ENV_FILE" \
 sudo -u "$WEB_USER" test -r "$APP_ENV_FILE" \
     || die "$APP_ENV_FILE is not readable by the web server user '$WEB_USER'"
 
+# Incident 2026-11-25 (docs/07-incident-note.md): DB password rotated in .env + MySQL,
+# but app.env not updated → app down with 1045. Compare the DB_* settings (hashes only,
+# no secrets printed) and refuse to deploy while they differ.
+db_settings_hash() { grep -E '^DB_(HOST|PORT|NAME|USER|PASS)=' | sort | sha256sum; }
+[[ "$(db_settings_hash < "$ENV_FILE")" == "$(sudo cat "$APP_ENV_FILE" | db_settings_hash)" ]] \
+    || die "DB settings in $APP_ENV_FILE differ from $ENV_FILE – sync with:
+       sudo install -m 640 -o root -g daemon $ENV_FILE $APP_ENV_FILE"
+
 echo "  ok  source  $SOURCE_DIR"
 echo "  ok  target  $DEPLOY_DIR"
-echo "  ok  config  $APP_ENV_FILE (readable by $WEB_USER)"
+echo "  ok  config  $APP_ENV_FILE (readable by $WEB_USER, DB settings match .env)"
 
 # -----------------------------------------------------------------------------
 step 2/6 "PHP syntax check"

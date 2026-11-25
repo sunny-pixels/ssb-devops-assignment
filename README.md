@@ -34,5 +34,5 @@ systemd/      lampp.service (start stack on boot)
 4. [Rsync deployment & release flow](docs/04-deploy-release.md)
 5. [Backup & restore](docs/05-backup-restore.md)
 6. [Security & permissions](docs/06-security-permissions.md)
-7. Troubleshooting / incident note — _todo_
+7. [Troubleshooting / incident note](docs/07-incident-note.md)
 8. Bonus: CI, vhost, cron, health check — _todo_
