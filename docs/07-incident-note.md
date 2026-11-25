@@ -6,7 +6,7 @@ A common real-world mistake: two copies of a secret, only one changed.
 
 ## Incident note
 
-> **INC-001 · 2026-11-25 · SSB Inventory app down (HTTP 503)**
+> **INC-001 · 2026-11-25 · SSB Inventory app down (HTTP 503) · impact ≈ 4 min (13:06:48–13:10:44 IST)**
 >
 > - **Issue:** after rotating the `ssb_app` DB password, `http://192.168.198.133/ssb-app/` showed
 >   "The database is currently unavailable" (HTTP 503); `health.php` reported `"database": "error 1045"`.
@@ -22,6 +22,17 @@ A common real-world mistake: two copies of a secret, only one changed.
 > - **Prevention:** `deploy.sh` pre-flight now compares the DB settings of both files (hashes only)
 >   and refuses to deploy while they differ; the rotation procedure ends with the sync + health
 >   check; `healthcheck.sh` (Phase 8) can run from cron to catch a 503 within minutes.
+
+### Timeline (from the logs and file timestamps)
+| Time (IST) | Event | Source |
+|---|---|---|
+| 13:06:24 | `.env` rewritten with the new password; `create-db-user.sh` applies it in MySQL | `ls -l .env` |
+| 13:06:48 | first failed page load – `[1045] Access denied` | `php_error_log`, MariaDB `.err` |
+| 13:07:09 | `health.php` → `"database": "error 1045"`, HTTP 503 | curl |
+| ~13:08 | MySQL running and listening ruled out; logs point to credentials | `lampp status`, `ss`, logs |
+| ~13:09 | `DB_PASS` hashes differ; `app.env` last changed 12:23:36; `.env` password works | `sha256sum`, `ls -l`, mysql login |
+| ~13:10 | `app.env` re-synced from `.env` | `sudo install` |
+| 13:10:44 | `health.php` → `"database": "ok"`, 11 items, HTTP 200; deploy pre-flight passes | curl, `deploy.sh --dry-run` |
 
 ---
 
@@ -98,6 +109,10 @@ check, and the connection has a 3 s timeout instead of hanging.
 | `screenshots/07-break.png` | 7.1 – password rotated in `.env` and MySQL |
 | `screenshots/07-symptom-browser.png` | 7.2 – 503 page in the browser |
 | `screenshots/07-symptom-health.png` | 7.2 – `health.php` → `"database": "error 1045"`, HTTP 503 |
-| `screenshots/07-investigate.png` | 7.3 – status/port OK, 1045 in both logs, hashes differ |
+| `screenshots/07-investigate-1.png` | 7.3 – MySQL running, 127.0.0.1:3306 listening, 1045 in PHP and MariaDB logs |
+| `screenshots/07-investigate-2.png` | 7.3 – `DB_PASS` hashes differ, `app.env` older, `.env` password works |
 | `screenshots/07-deploy-guard.png` | 7.3 – deploy refuses while configs differ |
-| `screenshots/07-fix.png` | 7.4 – sync, hashes equal, health 200 |
+| `screenshots/07-fix.png` | 7.4 – health `database: ok`, HTTP 200; pre-flight "DB settings match .env" |
+
+> The hashes shown are SHA-256 of a 20-character random password line – not reversible in
+> practice – and the old password they partly refer to is no longer valid.
