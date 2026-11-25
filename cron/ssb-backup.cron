@@ -1,0 +1,15 @@
+# Daily backup of the SSB inventory database + app files, for user ssbadmin.
+# Install:  crontab -l            # check for existing entries first
+#           crontab cron/ssb-backup.cron
+# Verify:   crontab -l
+#
+# Retention is done by backup.sh itself (BACKUP_RETENTION_DAYS in .env, default 7),
+# and only after a successful backup – a failing job never deletes the old copies.
+# Output (including errors) is appended to logs/backup.log in the repo.
+
+SHELL=/bin/bash
+PATH=/usr/local/bin:/usr/bin:/bin
+MAILTO=""
+
+# m  h  dom mon dow   command
+30   2  *   *   *     /home/ssbadmin/ssb-devops-assignment/scripts/backup.sh >> /home/ssbadmin/ssb-devops-assignment/logs/backup.log 2>&1
